@@ -1,1 +1,34 @@
+trigger AccountTrigger on Account (before insert, before update) {
+    AccountHandler.checkForDuplicateAccounts(Trigger.new);
+}
+------------------------------------------------------------------
+
+public class AccountHandler {
+
+    public static void checkForDuplicateAccounts(List<Account> newAccounts) {
+        // Get the set of account names to check for duplicates
+        Set<String> accountNames = new Set<String>();
+        for (Account acc : newAccounts) {
+            if (acc.Name != null) {
+                accountNames.add(acc.Name);
+            }
+        }
+        
+        // Query existing accounts with the same names
+        Map<String, Account> existingAccountsMap = new Map<String, Account>();
+        for (Account acc : [SELECT Id, Name FROM Account WHERE Name IN :accountNames]) {
+            existingAccountsMap.put(acc.Name, acc);
+        }
+
+        // Check each new account against the existing ones
+        for (Account acc : newAccounts) {
+            if (acc.Name != null && existingAccountsMap.containsKey(acc.Name)) {
+                Account existingAcc = existingAccountsMap.get(acc.Name);
+                if (acc.Id == null || acc.Id != existingAcc.Id) {
+                    acc.addError('An account with this name already exists.');
+                }
+            }
+        }
+    }
+}
 
