@@ -32,3 +32,39 @@ public class AccountHandler {
     }
 }
 
+-----------------------------------------------------
+public class AccountTriggerHandler 
+{
+Public Static Void checkForDuplicateAccounts(List<Account> accList)
+{
+    Set<string> accNames = new Set<string>();
+    if(!accList.IsEmpty())
+    {
+       for (Account acc : accList)
+       {
+          accNames.add(acc.Name); 
+       }
+    }
+    
+    List<Account> accountList = [Select id, name from Account where Name IN : accNames] ;
+    Map<String, Account> ExistingAccMap = new Map <string, Account>();
+    
+    if(!accountList.IsEmpty())
+    {
+     for(account acct : accountList)
+        {
+          ExistingAccMap.Put(acct.Name, acct);  
+        }
+
+    if(!accList.IsEmpty())
+    
+        for(account accobj : accList)
+        {
+            if(ExistingAccMap.containsKey(accobj.name))
+            {
+                accObj.adderror('An account with this name already exists.');
+            }
+        }
+    }
+   }
+}
